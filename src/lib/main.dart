@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:src/pages/event_page.dart';
 import 'package:src/pages/events_page.dart';
 import 'package:src/pages/home_page.dart';
+import 'package:src/pages/map_page.dart';
 import 'package:src/pages/shop_page.dart';
 import 'package:src/pages/splash_page.dart';
 
@@ -15,10 +16,12 @@ void main() {
         "/home": (context) => HomePage(),
         "/shop": (context) => ShopPage(),
         "/events": (context) => EventsPage(),
-        "/event": (context) => EventPage()
+        "/event": (context) => EventPage(),
+        "/map": (context) => MapPage()
       },
       theme: ThemeData(
         textButtonTheme: TextButtonThemeData(style: ButtonStyle(overlayColor: WidgetStatePropertyAll(Color(0x3313294B)), textStyle: WidgetStatePropertyAll(TextStyle(fontWeight: FontWeight.normal)))),
+        bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.transparent),
         primaryColor: Color(0xFF9C9A9D),
         primaryColorLight: Color(0xFFFF5F05),
         primaryColorDark: Color(0xFF13294B),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:src/widgets/navigation.dart';
 
 class EventsPage extends StatefulWidget {
@@ -25,8 +26,8 @@ class _EventsPageState extends State<EventsPage> {
     "Dec"
   ];
   List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  List<Map> upcoming = [{"name": "Keep Calm and Ask A Dad", "location": "CIF Room 3025", "date": DateTime.now(), "image": "https://i.imgur.com/Z3X6IMd.png", "body": "Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build!"}];
-  List<Map> past = [{"name": "UIUC vs Purdue Basketball", "location": "State Farm Center", "date": DateTime.now(), "image": "https://i.imgur.com/UGnaS5X.jpeg", "body": "Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build! Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build! Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build!!"}];
+  List<Map> upcoming = [{"name": "Keep Calm and Ask A Dad", "location": "CIF Room 3025", "date": DateTime.now(), "image": "https://i.imgur.com/Z3X6IMd.png", "body": "Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build!", "coordinates": LatLng(40.112866138760154, -88.22778400452617)}];
+  List<Map> past = [{"name": "UIUC vs Purdue Basketball", "location": "State Farm Center", "date": DateTime.now(), "image": "https://i.imgur.com/UGnaS5X.jpeg", "body": "Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build! Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build! Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build!!", "coordinates": LatLng(40.09659366812142, -88.23489569343018)}];
 
   Widget SwitchOption(int index, String text) {
     return Padding(
@@ -58,7 +59,7 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
-  Widget EventCard(String name, String location, DateTime date, String image, String body) {
+  Widget EventCard(String name, String location, DateTime date, String image, String body, LatLng coordinates) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 170,
@@ -141,7 +142,9 @@ class _EventsPageState extends State<EventsPage> {
                                 ],
                               ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.pushNamed(context, "/map", arguments: {"coordinates": coordinates});
+                                },
                                 child: Text(
                                   "View on map",
                                   style: Theme.of(context)
@@ -217,10 +220,10 @@ class _EventsPageState extends State<EventsPage> {
                       children: (selected == 0) ? ((upcoming.isEmpty) ? [Center(child: Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text("No upcoming events", style: Theme.of(context).typography.black.headlineLarge,),
-                      ))] : upcoming.map((e) => EventCard(e["name"], e["location"], e["date"], e["image"], e["body"])).toList()) : ((past.isEmpty) ? [Center(child: Padding(
+                      ))] : upcoming.map((e) => EventCard(e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"])).toList()) : ((past.isEmpty) ? [Center(child: Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text("No past events", style: Theme.of(context).typography.black.headlineLarge,),
-                      ))] : past.map((e) => EventCard(e["name"], e["location"], e["date"], e["image"], e["body"])).toList()),
+                      ))] : past.map((e) => EventCard(e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"])).toList()),
                     ),
                   ],
                 ),
