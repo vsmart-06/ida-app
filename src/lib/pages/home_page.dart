@@ -27,15 +27,18 @@ class _HomePageState extends State<HomePage> {
   List<Map> events = [{"date": DateTime.now(), "title": "Keep Calm and Ask A Dad", "location": "CIF Room 3025"}, {"date": DateTime.now(), "title": "UIUC vs Purdue Basketball", "location": "State Farm Center"}];
 
   Widget MainButton(Color color, String text, String route) {
-    return TextButton(
-      onPressed: () {},
-      child: Text(text, style: Theme.of(context).typography.white.labelMedium),
-      style: ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll(color),
-          foregroundColor: WidgetStatePropertyAll(Colors.white),
-          shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
-          minimumSize: WidgetStatePropertyAll(Size(100, 40))),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      child: TextButton(
+        onPressed: () {},
+        child: Text(text, style: Theme.of(context).typography.white.labelMedium!.apply(fontWeightDelta: 3)),
+        style: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(color),
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
+            shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
+            minimumSize: WidgetStatePropertyAll(Size(100, 40))),
+      ),
     );
   }
 
@@ -72,14 +75,14 @@ class _HomePageState extends State<HomePage> {
                             color: Color(0xBBFFFFFF),
                             borderRadius: BorderRadius.circular(10)),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               date.day.toString(),
                               style: Theme.of(context)
                                   .typography
                                   .white
-                                  .bodyLarge!
+                                  .labelLarge!
                                   .apply(color: Color(0xFFFF6007)),
                             ),
                             Text(
@@ -87,8 +90,8 @@ class _HomePageState extends State<HomePage> {
                               style: Theme.of(context)
                                   .typography
                                   .white
-                                  .bodySmall!
-                                  .apply(color: Color(0xFFFF6007)),
+                                  .labelSmall!
+                                  .apply(color: Color(0xFFFF6007), fontSizeDelta: -2),
                             ),
                           ],
                         ),
@@ -104,7 +107,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Text(
                           title,
-                          style: Theme.of(context).typography.black.headlineSmall,
+                          style: Theme.of(context).typography.black.headlineSmall!.apply(fontWeightDelta: 3),
                         ),
                         Row(
                           children: [
@@ -117,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                               style: Theme.of(context)
                                   .typography
                                   .black
-                                  .bodyMedium!
+                                  .labelMedium!
                                   .apply(color: Theme.of(context).primaryColor),
                             )
                           ],
@@ -186,16 +189,20 @@ class _HomePageState extends State<HomePage> {
                         )
                       ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        MainButton(Theme.of(context).primaryColorDark,
-                            "Subscribe", "/subscribe"),
-                        MainButton(Theme.of(context).primaryColorLight,
-                            "Donate", "/donate"),
-                        MainButton(Theme.of(context).primaryColorDark, "Shop",
-                            "/shop"),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          MainButton(Theme.of(context).primaryColorDark,
+                              "Tickets", "/tickets"),
+                          MainButton(Theme.of(context).primaryColorLight,
+                              "Donate", "/donate"),
+                          MainButton(Theme.of(context).primaryColorDark, "Shop",
+                              "/shop"),
+                          MainButton(Theme.of(context).primaryColorLight, "About Us",
+                              "/about"),
+                        ],
+                      ),
                     )
                   ],
                 ),
@@ -206,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Text(
                         "Upcoming Events",
-                        style: Theme.of(context).typography.black.headlineMedium,
+                        style: Theme.of(context).typography.black.headlineSmall,
                       ),
                       TextButton.icon(
                         onPressed: () {
@@ -217,7 +224,7 @@ class _HomePageState extends State<HomePage> {
                           style: Theme.of(context)
                               .typography
                               .black
-                              .labelLarge!
+                              .labelMedium!
                               .apply(color: Theme.of(context).primaryColor),
                         ),
                         icon: Icon(Icons.arrow_right_rounded),
@@ -263,15 +270,15 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 Text(
                                   "DADS PLAZA",
-                                  style: Theme.of(context).typography.white.headlineMedium!.apply(color: Theme.of(context).primaryColorLight),
+                                  style: Theme.of(context).typography.white.labelLarge!.apply(color: Theme.of(context).primaryColorLight, fontWeightDelta: 3),
                                 ),
                                 SizedBox(height: 20,),
                                 TextButton(
                                   onPressed: () {}, 
-                                  child: Text("Learn More", style: Theme.of(context).typography.white.bodyMedium,),
+                                  child: Text("Learn More", style: Theme.of(context).typography.white.labelMedium,),
                                   style: ButtonStyle(
                                     backgroundColor: WidgetStatePropertyAll(Theme.of(context).primaryColorLight),
-                                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))
+                                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))
                                   ),
                                 )
                               ]
@@ -280,8 +287,8 @@ class _HomePageState extends State<HomePage> {
                               width: MediaQuery.of(context).size.width/2.5,
                               child: Text(
                                 "Illini Dads Centennial Plaza honors the role and impact that father figures have in the lives of their Illini students",
-                                style: Theme.of(context).typography.white.bodyLarge,
-                                textAlign: TextAlign.justify,
+                                style: Theme.of(context).typography.white.bodyMedium!.apply(fontSizeDelta: 2),
+                                textAlign: TextAlign.center,
                               ),
                             )
                           ],

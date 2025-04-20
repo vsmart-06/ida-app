@@ -79,7 +79,7 @@ class _MapPageState extends State<MapPage> {
                             style: Theme.of(context)
                                 .typography
                                 .white
-                                .bodyMedium!
+                                .labelSmall!
                                 .apply(
                                   color: Theme.of(context).primaryColorLight,
                                 ),
@@ -89,10 +89,9 @@ class _MapPageState extends State<MapPage> {
                             style: Theme.of(context)
                                 .typography
                                 .black
-                                .headlineSmall!
+                                .labelMedium!
                                 .apply(
-                                    color: Theme.of(context).primaryColorDark,
-                                    fontSizeDelta: -6),
+                                    color: Theme.of(context).primaryColorDark),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,7 +111,7 @@ class _MapPageState extends State<MapPage> {
                                       style: Theme.of(context)
                                           .typography
                                           .black
-                                          .bodyMedium!
+                                          .labelSmall!
                                           .apply(
                                               color:
                                                   Theme.of(context).primaryColor),

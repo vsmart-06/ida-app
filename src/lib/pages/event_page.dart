@@ -90,7 +90,7 @@ class EventPage extends StatelessWidget {
                                           style: Theme.of(context)
                                               .typography
                                               .white
-                                              .labelMedium,
+                                              .labelMedium!.apply(fontWeightDelta: 3),
                                         )
                                       ],
                                     ),
@@ -109,7 +109,7 @@ class EventPage extends StatelessWidget {
                                             style: Theme.of(context)
                                                 .typography
                                                 .white
-                                                .labelMedium)
+                                                .labelMedium!.apply(fontWeightDelta: 3))
                                       ],
                                     )
                                   ],
@@ -127,7 +127,7 @@ class EventPage extends StatelessWidget {
                                   style: Theme.of(context)
                                       .typography
                                       .black
-                                      .headlineLarge,
+                                      .headlineLarge!.apply(fontWeightDelta: 3),
                                 ),
                                 SizedBox(
                                   height: 30,
@@ -137,7 +137,7 @@ class EventPage extends StatelessWidget {
                                   style: Theme.of(context)
                                       .typography
                                       .black
-                                      .labelLarge,
+                                      .labelLarge!.apply(fontWeightDelta: 3),
                                 ),
                                 SizedBox(
                                   height: 20,
@@ -159,13 +159,13 @@ class EventPage extends StatelessWidget {
                 onPressed: () {},
                 child: Text(
                   "RSVP",
-                  style: Theme.of(context).typography.white.headlineSmall,
+                  style: Theme.of(context).typography.white.labelLarge!.apply(fontSizeDelta: 2, fontWeightDelta: 3),
                 ),
                 style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(
                         Theme.of(context).primaryColorLight),
                     fixedSize: WidgetStatePropertyAll(
-                        Size(0.8 * MediaQuery.of(context).size.width, 50)),
+                        Size(0.6 * MediaQuery.of(context).size.width, 50)),
                     elevation: WidgetStatePropertyAll(10)),
               )
             ],
