@@ -175,7 +175,7 @@ class _MapPageState extends State<MapPage> {
             padding: const EdgeInsets.all(20.0),
             child: Card(color: Colors.white, child: Padding(
               padding: const EdgeInsets.all(5.0),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back_ios), color: Colors.black,), Expanded(child: TextFormField(decoration: InputDecoration(border: InputBorder.none, hintText: "Search for events", hintStyle: Theme.of(context).typography.black.bodyLarge!.apply(color: Color(0xFF9C9A9D))),))],),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back_ios), color: Colors.black,), Expanded(child: TextFormField(decoration: InputDecoration(border: InputBorder.none, hintText: "Search for events", hintStyle: Theme.of(context).typography.black.labelLarge!.apply(color: Color(0xFF9C9A9D))), cursorColor: Colors.black,))],),
             )),
           ),
         ],

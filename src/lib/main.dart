@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:src/pages/event_page.dart';
 import 'package:src/pages/events_page.dart';
 import 'package:src/pages/home_page.dart';
+import 'package:src/pages/login_page.dart';
 import 'package:src/pages/map_page.dart';
 import 'package:src/pages/shop_page.dart';
+import 'package:src/pages/signup_page.dart';
 import 'package:src/pages/splash_page.dart';
 
 void main() {
@@ -12,7 +14,9 @@ void main() {
   runApp(
     MaterialApp(
       routes: {
-        "/": (context) => SplashPage(),
+        "/splash": (context) => SplashPage(),
+        "/": (context) => LoginPage(),
+        "/signup": (context) => SignupPage(),
         "/home": (context) => HomePage(),
         "/shop": (context) => ShopPage(),
         "/events": (context) => EventsPage(),
