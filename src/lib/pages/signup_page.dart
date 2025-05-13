@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:src/services/secure_storage.dart';
 
 class CirclePainter extends CustomPainter {
   Color color;
@@ -31,6 +35,42 @@ class _SignupPageState extends State<SignupPage> {
   Color grey = Color(0xFF9C9A9D);
   String email = "";
   String password = "";
+  String error = "";
+
+  String baseUrl = "https://6907-130-126-255-165.ngrok-free.app/ida-app";
+
+  Future<bool> signup() async {
+    var response = await post(Uri.parse(baseUrl + "/signup/"), body: {"email": email, "password": password});
+    Map info = jsonDecode(response.body);
+    if (info.containsKey("error")) {
+      setState(() {
+        error = info["error"];
+      });
+      return false;
+    }
+    await SecureStorage.writeMany({"user_id": info["user_id"].toString(), "last_login": DateTime.now().toString(), "email": info["email"].toString(), "admin": info["admin"].toString()});
+    Navigator.popAndPushNamed(context, "/home");
+    return true;
+  }
+
+  Future<void> checkLogin() async {
+    Map<String, String> info = await SecureStorage.read();
+    if (info["last_login"] != null) {
+      DateTime date = DateTime.parse(info["last_login"]!);
+      if (DateTime.now().subtract(Duration(days: 30)).compareTo(date) >= 0) {
+        await SecureStorage.delete();
+        await Navigator.popAndPushNamed(context, "/login");
+        return;
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkLogin();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,12 +174,41 @@ class _SignupPageState extends State<SignupPage> {
                           }),
                         ),
                       ),
+                      (error.isNotEmpty) ? Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                        child: Text(
+                          error,
+                          style: Theme.of(context).typography.white.bodyLarge!.apply(color: Colors.red),
+                        ),
+                      ) : Container()
                     ],
                   ),
                   Column(
                     children: [
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          if (email.isEmpty) {
+                            setState(() {
+                              error = "Email cannot be empty";
+                            });
+                            return;
+                          }
+                          if (password.isEmpty) {
+                            setState(() {
+                              error = "Password cannot be empty";
+                            });
+                            return;
+                          }
+
+                          if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) {
+                            setState(() {
+                              error = "Invalid email format";
+                            });
+                            return;
+                          }
+
+                          await signup();
+                        },
                         child: Text(
                           "SIGNUP",
                           style: Theme.of(
@@ -167,7 +236,7 @@ class _SignupPageState extends State<SignupPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text("Already have an account?", style: Theme.of(context).typography.black.bodyLarge!.apply(color: Theme.of(context).primaryColorDark),),
-                            TextButton(onPressed: () {Navigator.of(context).popAndPushNamed("/");}, child: Text("Log In", style: Theme.of(context).typography.black.bodyLarge!.apply(color: Theme.of(context).primaryColorDark, fontWeightDelta: 7, decoration: TextDecoration.underline),))
+                            TextButton(onPressed: () {Navigator.of(context).popAndPushNamed("/login");}, child: Text("Log In", style: Theme.of(context).typography.black.bodyLarge!.apply(color: Theme.of(context).primaryColorDark, fontWeightDelta: 7, decoration: TextDecoration.underline),))
                           ],
                         ),
                       )

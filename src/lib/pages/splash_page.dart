@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:src/services/secure_storage.dart";
 
 class CirclePainter extends CustomPainter {
   Color color;
@@ -32,8 +33,21 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 1), () => Navigator.popAndPushNamed(context, "/home"));
+    checkLogin();
+  }
 
+  Future<void> checkLogin() async {
+    Map<String, String> info = await SecureStorage.read();
+    if (info["last_login"] != null) {
+      DateTime date = DateTime.parse(info["last_login"]!);
+      if (DateTime.now().subtract(Duration(days: 30)).compareTo(date) >= 0) {
+        await SecureStorage.delete();
+        await Navigator.popAndPushNamed(context, "/login");
+        return;
+      }
+    }
+    if (info["user_id"] != null) await Navigator.popAndPushNamed(context, "/home");
+    else await Navigator.popAndPushNamed(context, "/login");
   }
 
   @override

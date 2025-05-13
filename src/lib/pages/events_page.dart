@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:src/services/secure_storage.dart';
 import 'package:src/widgets/navigation.dart';
 
 class EventsPage extends StatefulWidget {
@@ -10,6 +15,9 @@ class EventsPage extends StatefulWidget {
 }
 
 class _EventsPageState extends State<EventsPage> {
+  late int user_id;
+  List<bool> loaded = [false, false];
+
   int selected = 0;
   List<String> months = [
     "Jan",
@@ -26,8 +34,11 @@ class _EventsPageState extends State<EventsPage> {
     "Dec"
   ];
   List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  List<List<Map>> upcoming = [[{"name": "Keep Calm and Ask A Dad", "location": "CIF Room 3025", "date": DateTime.now(), "image": "https://i.imgur.com/Z3X6IMd.png", "body": "Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build!", "coordinates": LatLng(40.112866138760154, -88.22778400452617), "notify": true}], [{"name": "Keep Calm and Ask A Dad", "location": "CIF Room 3025", "date": DateTime.now(), "image": "https://i.imgur.com/Z3X6IMd.png", "body": "Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build!", "coordinates": LatLng(40.112866138760154, -88.22778400452617), "notify": false}]];
-  List<Map> past = [{"name": "UIUC vs Purdue Basketball", "location": "State Farm Center", "date": DateTime.now(), "image": "https://i.imgur.com/UGnaS5X.jpeg", "body": "Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build! Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build! Calling all University of Illinois students! Join us for the Illini Dads Association's \"Ask A Dad\" Q&A session—a unique opportunity to connect with experienced Illini dads and gain valuable insights into life after campus/jump starting your careers. Don't miss this chance to ask questions and build!!", "coordinates": LatLng(40.09659366812142, -88.23489569343018), "notify": true}];
+  Map<String, List> upcoming = {"all": [], "essential": []};
+  List<Map> past = [];
+  List notifs = [];
+
+  String baseUrl = "https://6907-130-126-255-165.ngrok-free.app/ida-app";
 
   Widget SwitchOption(int index, String text) {
     return Padding(
@@ -61,7 +72,7 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
-  Widget EventCard(int index, String name, String location, DateTime date, String image, String body, LatLng coordinates, bool notify) {
+  Widget EventCard(int index, int event_id, String name, String location, DateTime date, String image, String body, LatLng coordinates) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 170,
@@ -106,7 +117,7 @@ class _EventsPageState extends State<EventsPage> {
                                   Padding(
                                     padding: const EdgeInsets.only(bottom: 5.0),
                                     child: Text(
-                                      "${days[date.weekday-1]}, ${months[date.month-1]} ${date.day} • ${date.hour % 12 == 0 ? 12 : date.hour % 12}:${date.minute} ${(date.hour >= 12) ? "PM" : "AM"}",
+                                      "${days[date.weekday-1]}, ${months[date.month-1]} ${(date.day < 10) ? 0 : ""}${date.day} • ${(date.hour % 12 < 10 && date.hour % 12 != 0) ? 0 : ""}${(date.hour % 12 == 0) ? 12 : date.hour % 12}:${(date.minute < 10) ? 0 : ""}${date.minute} ${(date.hour >= 12) ? "PM" : "AM"}",
                                       style: Theme.of(context)
                                           .typography
                                           .white
@@ -116,13 +127,15 @@ class _EventsPageState extends State<EventsPage> {
                                           ),
                                     ),
                                   ),
-                                  IconButton(onPressed: () {
+                                  IconButton(onPressed: () async {
                                     setState(() {
-                                      if (upcoming[0][index]["name"] == name) upcoming[0][index]["notify"] = !notify;
-                                      if (upcoming[1][index]["name"] == name) upcoming[1][index]["notify"] = !notify;
-                                      if (past[index]["name"] == name) past[index]["notify"] = !notify;
+                                      if (notifs.contains(event_id)) notifs.remove(event_id);
+                                      else notifs.add(event_id);
                                     });
-                                  }, icon: Icon((notify) ? Icons.notifications_active : Icons.notification_add), color: (notify) ? Theme.of(context).primaryColorDark : Theme.of(context).primaryColorLight, iconSize: 30,)
+
+                                    await post(Uri.parse(baseUrl + "/toggle-notification/"), body: {"user_id": user_id.toString(), "event_id": event_id.toString()});
+                                    await getNotifications();
+                                  }, icon: Icon((notifs.contains(event_id)) ? Icons.notifications_active : Icons.notification_add), color: (notifs.contains(event_id)) ? Theme.of(context).primaryColorDark : Theme.of(context).primaryColorLight, iconSize: 30,)
                                 ],
                               ),
                               Text(
@@ -194,8 +207,74 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
+  Future<void> getEvents() async {
+    var response = await get(Uri.parse(baseUrl + "/get-events"));
+    Map info = jsonDecode(response.body);
+    List all_events = info["data"];
+
+    List<Map> all_past = [];
+    List<Map> all_new = [];
+    List<Map> essential = [];
+    for (int i = 0; i < all_events.length; i++) {
+      all_events[i]["coordinates"] = LatLng(all_events[i]["latitude"], all_events[i]["longitude"]);
+      all_events[i]["date"] = DateTime.parse(all_events[i]["date"]);
+
+      if (all_events[i]["completed"]) all_past.add(all_events[i]);
+      else {
+        all_new.add(all_events[i]);
+        if (all_events[i]["essential"]) essential.add(all_events[i]);
+      }
+    }
+
+    setState(() {
+      past = all_past;
+      upcoming = {"all": all_new, "essential": essential};
+      loaded[0] = true;
+    });
+  }
+
+  Future<void> getNotifications() async {
+    var response = await get(Uri.parse(baseUrl + "/get-notifications?user_id=${user_id}"));
+    Map info = jsonDecode(response.body);
+    setState(() {
+      notifs = info["data"];
+      loaded[1] = true;
+    });
+  }
+
+  Future<void> checkLogin() async {
+    Map<String, String> info = await SecureStorage.read();
+    if (info["last_login"] != null) {
+      DateTime date = DateTime.parse(info["last_login"]!);
+      if (DateTime.now().subtract(Duration(days: 30)).compareTo(date) >= 0) {
+        await SecureStorage.delete();
+        await Navigator.popAndPushNamed(context, "/login");
+        return;
+      }
+    }
+    if (info["user_id"] == null) {
+      await Navigator.popAndPushNamed(context, "/login");
+      return;
+    }
+
+    setState(() {
+      user_id = int.parse(info["user_id"]!);
+    });
+    await getNotifications();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkLogin();
+    getEvents();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (loaded.contains(false)) return Scaffold(body: Center(child: LoadingAnimationWidget.inkDrop(color: Theme.of(context).primaryColorLight, size: 100)),);
+
     return Scaffold(
         appBar: AppBar(
           title: Text("Events",
@@ -242,13 +321,13 @@ class _EventsPageState extends State<EventsPage> {
                     ) : Container(),
                     Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: (selected == 0) ? ((upcoming[0].isEmpty) ? [Center(child: Padding(
+                      children: (selected == 0) ? ((upcoming["all"]!.isEmpty) ? [Center(child: Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text("No upcoming events", style: Theme.of(context).typography.black.headlineLarge,),
-                      ))] : upcoming[0].map((e) => EventCard(upcoming[0].indexOf(e), e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"], e["notify"])).toList()) : ((past.isEmpty) ? [Center(child: Padding(
+                      ))] : upcoming["all"]!.map((e) => EventCard(upcoming["all"]!.indexOf(e), e["event_id"], e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"])).toList()) : ((past.isEmpty) ? [Center(child: Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text("No past events", style: Theme.of(context).typography.black.headlineLarge,),
-                      ))] : past.map((e) => EventCard(past.indexOf(e), e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"], e["notify"])).toList()),
+                      ))] : past.map((e) => EventCard(past.indexOf(e), e["event_id"], e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"])).toList()),
                     ),
                     (selected == 0) ? Padding(
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
@@ -256,13 +335,13 @@ class _EventsPageState extends State<EventsPage> {
                     ) : Container(),
                     (selected == 0) ? Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: (selected == 0) ? ((upcoming[1].isEmpty) ? [Center(child: Padding(
+                      children: (selected == 0) ? ((upcoming["essential"]!.isEmpty) ? [Center(child: Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text("No upcoming events", style: Theme.of(context).typography.black.headlineLarge,),
-                      ))] : upcoming[1].map((e) => EventCard(upcoming[1].indexOf(e), e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"], e["notify"])).toList()) : ((past.isEmpty) ? [Center(child: Padding(
+                      ))] : upcoming["essential"]!.map((e) => EventCard(upcoming["essential"]!.indexOf(e), e["event_id"], e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"])).toList()) : ((past.isEmpty) ? [Center(child: Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text("No past events", style: Theme.of(context).typography.black.headlineLarge,),
-                      ))] : past.map((e) => EventCard(past.indexOf(e), e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"], e["notify"])).toList()),
+                      ))] : past.map((e) => EventCard(past.indexOf(e), e["event_id"], e["name"], e["location"], e["date"], e["image"], e["body"], e["coordinates"])).toList()),
                     ) : Container(),
                   ],
                 ),

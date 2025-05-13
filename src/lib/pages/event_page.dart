@@ -155,18 +155,21 @@ class EventPage extends StatelessWidget {
                           ),
                         ],
                       ))),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  "RSVP",
-                  style: Theme.of(context).typography.white.labelLarge!.apply(fontSizeDelta: 2, fontWeightDelta: 3),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    "RSVP",
+                    style: Theme.of(context).typography.white.labelLarge!.apply(fontSizeDelta: 2, fontWeightDelta: 3),
+                  ),
+                  style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(
+                          Theme.of(context).primaryColorLight),
+                      fixedSize: WidgetStatePropertyAll(
+                          Size(0.6 * MediaQuery.of(context).size.width, 50)),
+                      elevation: WidgetStatePropertyAll(10)),
                 ),
-                style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                        Theme.of(context).primaryColorLight),
-                    fixedSize: WidgetStatePropertyAll(
-                        Size(0.6 * MediaQuery.of(context).size.width, 50)),
-                    elevation: WidgetStatePropertyAll(10)),
               )
             ],
           )),

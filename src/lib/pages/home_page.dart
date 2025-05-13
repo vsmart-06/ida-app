@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:src/services/secure_storage.dart';
 import 'package:src/widgets/navigation.dart';
 
 class HomePage extends StatefulWidget {
@@ -135,6 +136,26 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> checkLogin() async {
+    Map<String, String> info = await SecureStorage.read();
+    if (info["last_login"] != null) {
+      DateTime date = DateTime.parse(info["last_login"]!);
+      if (DateTime.now().subtract(Duration(days: 30)).compareTo(date) >= 0) {
+        await SecureStorage.delete();
+        await Navigator.popAndPushNamed(context, "/login");
+        return;
+      }
+    }
+    if (info["user_id"] == null) await Navigator.popAndPushNamed(context, "/login");
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkLogin();
   }
 
   @override

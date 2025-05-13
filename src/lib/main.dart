@@ -5,6 +5,8 @@ import 'package:src/pages/events_page.dart';
 import 'package:src/pages/home_page.dart';
 import 'package:src/pages/login_page.dart';
 import 'package:src/pages/map_page.dart';
+import 'package:src/pages/profile_page.dart';
+import 'package:src/pages/settings_page.dart';
 import 'package:src/pages/shop_page.dart';
 import 'package:src/pages/signup_page.dart';
 import 'package:src/pages/splash_page.dart';
@@ -14,14 +16,16 @@ void main() {
   runApp(
     MaterialApp(
       routes: {
-        "/splash": (context) => SplashPage(),
-        "/": (context) => LoginPage(),
+        "/": (context) => SplashPage(),
+        "/login": (context) => LoginPage(),
         "/signup": (context) => SignupPage(),
         "/home": (context) => HomePage(),
         "/shop": (context) => ShopPage(),
         "/events": (context) => EventsPage(),
         "/event": (context) => EventPage(),
-        "/map": (context) => MapPage()
+        "/map": (context) => MapPage(),
+        "/profile": (context) => ProfilePage(),
+        "/settings": (context) => SettingsPage()
       },
       theme: ThemeData(
         textButtonTheme: TextButtonThemeData(style: ButtonStyle(overlayColor: WidgetStatePropertyAll(Color(0x3313294B)), textStyle: WidgetStatePropertyAll(TextStyle(fontWeight: FontWeight.normal)))),
