@@ -61,4 +61,4 @@ class UserSettings(models.Model):
     updates = models.BooleanField(default = True, null = False)
     merch = models.BooleanField(default = True, null = False)
     status = models.BooleanField(default = True, null = False)
-    reminders = models.TimeField(unique = False, null = True)
+    reminders = models.TextField(choices = [("Off", "Off"), ("30 minutes before", "30 minutes before"), ("2 hours before", "2 hours before"), ("6 hours before", "6 hours before")], default = "30 minutes before", null = False)

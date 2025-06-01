@@ -1,4 +1,5 @@
 import datetime
+import time
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
@@ -7,7 +8,6 @@ from ida_app.models import *
 def index(request: HttpRequest):
     return HttpResponse("API is up and running")
 
-@csrf_exempt
 def signup(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
@@ -25,9 +25,11 @@ def signup(request: HttpRequest):
     except Exception:
         return JsonResponse({"error": "A user with that email already exists"}, status = 400)
 
+    settings = UserSettings(user = user, announcements = True, updates = True, merch = True, status = True, reminders = True)
+    settings.save()
+
     return JsonResponse({"message": "User successfully signed up", "user_id": user.user_id, "email": user.email, "admin": user.admin})
 
-@csrf_exempt
 def login(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
@@ -47,7 +49,6 @@ def login(request: HttpRequest):
     
     return JsonResponse({"error": "Email or password is incorrect"}, status = 400)
 
-@csrf_exempt
 def add_event(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
@@ -88,7 +89,6 @@ def add_event(request: HttpRequest):
 
     return JsonResponse({"message": "Event successfully added", "event_id": event.event_id})
 
-@csrf_exempt
 def get_events(request: HttpRequest):
     if request.method != "GET":
         return JsonResponse({"error": "This endpoint can only be accessed via GET"}, status = 400)
@@ -108,7 +108,6 @@ def get_events(request: HttpRequest):
 
     return JsonResponse({"data": events})
 
-@csrf_exempt
 def toggle_notification(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
@@ -116,12 +115,12 @@ def toggle_notification(request: HttpRequest):
     try:
         user_id = int(request.POST.get("user_id"))
     except:
-        return JsonResponse({"error": "'user_id' field is required as a float"}, status = 400)
+        return JsonResponse({"error": "'user_id' field is required as a int"}, status = 400)
     
     try:
         event_id = int(request.POST.get("event_id"))
     except:
-        return JsonResponse({"error": "'event_id' field is required as a float"}, status = 400)
+        return JsonResponse({"error": "'event_id' field is required as a int"}, status = 400)
 
     try:
         user = UserCredentials.objects.get(user_id = user_id)
@@ -142,7 +141,6 @@ def toggle_notification(request: HttpRequest):
     
     return JsonResponse({"message": "Notification successfully toggled"})
 
-@csrf_exempt
 def get_notifications(request: HttpRequest):
     if request.method != "GET":
         return JsonResponse({"error": "This endpoint can only be accessed via GET"}, status = 400)
@@ -150,7 +148,7 @@ def get_notifications(request: HttpRequest):
     try:
         user_id = int(request.GET.get("user_id"))
     except:
-        return JsonResponse({"error": "'user_id' field is required as a float"}, status = 400)
+        return JsonResponse({"error": "'user_id' field is required as a int"}, status = 400)
 
     try:
         user = UserCredentials.objects.get(user_id = user_id)
@@ -160,3 +158,70 @@ def get_notifications(request: HttpRequest):
     notifs = UserNotifications.objects.filter(user = user).only("event_id")
     
     return JsonResponse({"data": [x["event_id"] for x in list(notifs.values("event_id"))]})
+
+def change_settings(request: HttpRequest):
+    if request.method != "POST":
+        return JsonResponse({"error": "This endpoint can only be accessed via POST"}, status = 400)
+    
+    try:
+        user_id = int(request.POST.get("user_id"))
+    except:
+        return JsonResponse({"error": "'user_id' field is required as a int"}, status = 400)
+    
+    announcements = request.POST.get("announcements")
+    if not announcements:
+        return JsonResponse({"error": "'announcements' field is required"}, status = 400)
+    announcements = announcements == "yes"
+    
+    updates = request.POST.get("updates")
+    if not updates:
+        return JsonResponse({"error": "'updates' field is required"}, status = 400)
+    updates = updates == "yes"
+    
+    merch = request.POST.get("merch")
+    if not merch:
+        return JsonResponse({"error": "'merch' field is required"}, status = 400)
+    merch = merch == "yes"
+    
+    status = request.POST.get("status")
+    if not status:
+        return JsonResponse({"error": "'status' field is required"}, status = 400)
+    status = status == "yes"
+
+    reminders = request.POST.get("reminders")
+    if not reminders:
+        return JsonResponse({"error": "'reminders' field is required"}, status = 400)
+    
+    try:
+        user = UserCredentials.objects.get(user_id = user_id)
+    except:
+        return JsonResponse({"error": "A user with that user ID does not exist"}, status = 400)
+    
+    settings = UserSettings.objects.get(user = user)
+    settings.announcements = announcements
+    settings.updates = updates
+    settings.merch = merch
+    settings.status = status
+    settings.reminders = reminders
+    settings.save()
+
+    return JsonResponse({"message": "Settings changed successfully"})
+
+def get_settings(request: HttpRequest):
+    if request.method != "GET":
+        return JsonResponse({"error": "This endpoint can only be accessed via GET"}, status = 400)
+    
+    try:
+        user_id = int(request.GET.get("user_id"))
+    except:
+        return JsonResponse({"error": "'user_id' field is required as a int"}, status = 400)
+    
+    try:
+        user = UserCredentials.objects.get(user_id = user_id)
+    except:
+        return JsonResponse({"error": "A user with that user ID does not exist"}, status = 400)
+    
+    settings = UserSettings.objects.get(user = user).__dict__
+    settings.pop("_state")
+
+    return JsonResponse({"data": settings})

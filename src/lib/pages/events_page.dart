@@ -38,7 +38,7 @@ class _EventsPageState extends State<EventsPage> {
   List<Map> past = [];
   List notifs = [];
 
-  String baseUrl = "https://6907-130-126-255-165.ngrok-free.app/ida-app";
+  String baseUrl = "https://4411-130-126-255-165.ngrok-free.app/ida-app";
 
   Widget SwitchOption(int index, String text) {
     return Padding(
@@ -286,7 +286,7 @@ class _EventsPageState extends State<EventsPage> {
           actions: [IconButton(onPressed: () {}, icon: Icon(Icons.more_vert))],
         ),
         body: RefreshIndicator(
-            onRefresh: () async {},
+            onRefresh: () async {await getEvents();},
             color: Theme.of(context).primaryColorLight,
             backgroundColor: Colors.white,
             child: SingleChildScrollView(
